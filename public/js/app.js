@@ -21,20 +21,6 @@ removeElement = function(elem) {
   return elem.parentNode.removeChild(elem);
 };
 
-({
-  EventFallback: function(event, params) {
-    var evt;
-    params = params || {
-      bubbles: false,
-      cancelable: false,
-      detail: void 0
-    };
-    evt = document.createEvent('EventFallback');
-    evt.initCustomEven(event, params.bubbles, params.cancelable, params.detail);
-    return evt;
-  }
-});
-
 Gallery = (function() {
   Gallery.prototype.zoomed = false;
 
@@ -45,10 +31,11 @@ Gallery = (function() {
     this.idx = 0;
     this.images = [];
     this.window = new Window(this);
-    this.fill_window();
   }
 
   Gallery.prototype.fill_window = function() {};
+
+  Gallery.prototype.bind_swipe = function() {};
 
   Gallery.prototype.handle_zmove_start = function(evt) {
     var touch;
@@ -66,7 +53,6 @@ Gallery = (function() {
   };
 
   Gallery.prototype.handle_swipe = function() {
-    llog("swipe");
     return this.next();
   };
 
@@ -114,12 +100,14 @@ Gallery = (function() {
     this.unbind_movearound();
     this.px = 0;
     this.py = 0;
-    this.remove_all_listeners(img);
-    return document.removeEventListener("mouseup", this.handle_mouseup);
+    return this.remove_all_listeners(img);
   };
 
   Gallery.prototype.handle_zdrag_start = function(evt) {
-    return this.drag_start = evt;
+    return this.drag_start = {
+      x: evt.pageX,
+      y: evt.pageY
+    };
   };
 
   Gallery.prototype.handle_zdrag_end = function(evt) {
@@ -128,8 +116,8 @@ Gallery = (function() {
     if (!this.drag_start) {
       return;
     }
-    dx = evt.x - this.drag_start.x;
-    dy = evt.y - this.drag_start.y;
+    dx = evt.pageX - this.drag_start.x;
+    dy = evt.pageY - this.drag_start.y;
     px = dx / innerWidth * 100;
     py = dy / innerHeight * 100;
     this.px = px + this.px;
@@ -141,54 +129,29 @@ Gallery = (function() {
     });
   };
 
-  Gallery.prototype.create_event = function(name, location) {
-    var evt;
-    evt = new Event(name);
-    evt.x = location.pageX;
-    evt.y = location.pageY;
-    return evt;
+  Gallery.prototype.handle_mouseup = function(event) {
+    return this.handle_zdrag_end(event);
   };
 
-  Gallery.prototype.handle_mouseup = function(event) {
-    var evt, img;
-    evt = this.create_event("zend", event);
-    img = document.querySelector(".main img");
-    return img.dispatchEvent(evt);
+  Gallery.prototype.unbind_movearound = function() {
+    return document.removeEventListener("mouseup", this.handle_mouseup);
   };
 
   Gallery.prototype.bind_movearound = function() {
     var img,
       _this = this;
     img = document.querySelector(".main img");
-    img.addEventListener("mousedown", function(event) {
-      var evt;
-      evt = _this.create_event("zstart", event);
-      return img.dispatchEvent(evt);
-    });
+    img.addEventListener("mousedown", this.handle_zdrag_start.bind(this));
     document.addEventListener("mouseup", this.handle_mouseup);
     img.addEventListener("dragstart", function(event) {
       return event.preventDefault();
     });
     img.addEventListener("touchstart", function(event) {
-      var evt;
-      evt = _this.create_event("zstart", event.touches[0]);
-      return img.dispatchEvent(evt);
+      return _this.handle_zdrag_start(event.touches[0]);
     });
-    img.addEventListener("touchend", function(event) {
-      var evt;
-      evt = _this.create_event("zend", event.changedTouches[0]);
-      return img.dispatchEvent(evt);
+    return img.addEventListener("touchend", function(event) {
+      return _this.handle_zdrag_end(event.changedTouches[0]);
     });
-    img.addEventListener("zstart", this.handle_zdrag_start.bind(this));
-    return img.addEventListener("zend", this.handle_zdrag_end.bind(this));
-  };
-
-  Gallery.prototype.unbind_movearound = function() {};
-
-  Gallery.prototype.movearound = function(evt) {
-    var x, y;
-    x = evt.pageX;
-    return y = evt.pageY;
   };
 
   Gallery.prototype.next = function() {
