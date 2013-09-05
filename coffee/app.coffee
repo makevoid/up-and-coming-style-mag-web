@@ -274,8 +274,8 @@ class Window
     if idx > @gallery.idx then "next" else "prev"
 
   pad: (num) ->
-    s = "0" + num
-    s.substr s.length-2
+    s = "00" + num
+    s.substr s.length-3
 
 
 

@@ -314,8 +314,8 @@ Window = (function() {
 
   Window.prototype.pad = function(num) {
     var s;
-    s = "0" + num;
-    return s.substr(s.length - 2);
+    s = "00" + num;
+    return s.substr(s.length - 3);
   };
 
   return Window;

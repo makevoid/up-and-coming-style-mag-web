@@ -25,7 +25,7 @@ class Upandcoming < Sinatra::Base
 
   # confs
 
-  ISSUE_NUM = 4 # defines the directory whre the issue images are
+  ISSUE_NUM = 1 # defines the directory whre the issue images are
 
   #
 

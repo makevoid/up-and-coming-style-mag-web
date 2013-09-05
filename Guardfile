@@ -7,6 +7,7 @@ guard 'livereload' do
   watch(%r{public/js/.+.js})
 end
 
+# guard :haml, input: "views", output: "public"
 
 # js_files = %w(vendor/hammer vendor/underscore vendor/zepto vendor/jimagesloaded)
 # js_files << "old"
