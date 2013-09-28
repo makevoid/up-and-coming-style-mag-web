@@ -1,7 +1,6 @@
 if (!Function.prototype.bind) {
   Function.prototype.bind = function(oThis) {
     var aArgs, fBound, fNOP, fToBind;
-
     if (typeof this !== "function") {
       throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
     }
@@ -71,7 +70,7 @@ if (!Function.prototype.bind) {
       loaded ? fn() : fns.push(fn)
     })
 })
-var Gallery, PATH, SIZE, Window, defer, json, llog, removeElement,
+var Gallery, PATH, SIZE, Window, defer, format, json, llog, removeElement,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 json = JSON.parse(ISSUES_JSON);
@@ -79,6 +78,8 @@ json = JSON.parse(ISSUES_JSON);
 PATH = json.path;
 
 SIZE = json.size;
+
+format = "jpg";
 
 llog = function(log) {
   var debug;
@@ -121,8 +122,7 @@ Gallery = (function() {
     end = evt.changedTouches[0];
     start = this.start_zoom_touch;
     x = end.pageX - start.pageX;
-    y = end.pageY - start.pageY;
-    return console.log("zoom end", x, y);
+    return y = end.pageY - start.pageY;
   };
 
   Gallery.prototype.handle_swipe = function() {
@@ -186,9 +186,6 @@ Gallery = (function() {
   Gallery.prototype.handle_zdrag_end = function(evt) {
     var dx, dy, px, py,
       _this = this;
-    if (!this.drag_start) {
-      return;
-    }
     dx = evt.pageX - this.drag_start.x;
     dy = evt.pageY - this.drag_start.y;
     px = dx / innerWidth * 100;
@@ -198,8 +195,29 @@ Gallery = (function() {
     this.px = Math.min(25, Math.max(-25, this.px));
     this.py = Math.min(25, Math.max(-25, this.py));
     return defer(function() {
-      return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + _this.px + "%, " + _this.py + "%, 0)";
+      evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + _this.px + "%, " + _this.py + "%, 0)";
+      return _this.drag_start = null;
     });
+  };
+
+  Gallery.prototype.handle_zdrag_move = function(evt) {
+    var dx, dy, px, py,
+      _this = this;
+    if (this.drag_start) {
+      dx = evt.pageX - this.drag_start.x;
+      dy = evt.pageY - this.drag_start.y;
+      px = dx / innerWidth * 100;
+      py = dy / innerHeight * 100;
+      this.px = px * 6;
+      this.py = py * 6;
+      defer(function() {
+        return evt.target.style.webkitTransform = "scale3d(" + _this.scale_factor + ") translate3d(" + _this.px + "%, " + _this.py + "%, 0)";
+      });
+    }
+    return this.drag_start = {
+      x: evt.pageX,
+      y: evt.pageY
+    };
   };
 
   Gallery.prototype.handle_mouseup = function(event) {
@@ -207,7 +225,7 @@ Gallery = (function() {
   };
 
   Gallery.prototype.unbind_movearound = function() {
-    return document.removeEventListener("mouseup", this.handle_mouseup);
+    return document.removeEventListener("mouseup", this.handle_zdrag_end);
   };
 
   Gallery.prototype.bind_movearound = function() {
@@ -222,8 +240,11 @@ Gallery = (function() {
     img.addEventListener("touchstart", function(event) {
       return _this.handle_zdrag_start(event.touches[0]);
     });
-    return img.addEventListener("touchend", function(event) {
+    img.addEventListener("touchend", function(event) {
       return _this.handle_zdrag_end(event.changedTouches[0]);
+    });
+    return img.addEventListener("touchmove", function(event) {
+      return _this.handle_zdrag_move(event.changedTouches[0]);
     });
   };
 
@@ -295,7 +316,7 @@ Window = (function() {
     img = document.createElement("img");
     img.draggable = true;
     img.dataset.id = idx;
-    img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
+    img.src = "" + this.images_dir + "/" + (this.pad(idx + 1)) + "." + format;
     this.gallery_elem().appendChild(img);
     img.style.opacity = 1;
     return img.style.webkitTransform = "translate3d(0, 0, 0)";
@@ -306,12 +327,13 @@ Window = (function() {
   };
 
   Window.prototype.push_image = function(idx) {
-    var direction, img;
+    var direction, img, src;
     direction = this.direction(idx);
     img = document.createElement("img");
     img.draggable = true;
     img.dataset.id = idx;
-    img.src = "/" + this.images_dir + "/" + (this.pad(idx + 1)) + ".jpg";
+    src = "" + this.images_dir + "/" + (this.pad(idx + 1)) + "." + format;
+    img.src = src;
     this.gallery_elem().appendChild(img);
     img.style.opacity = 1;
     if (direction === "next") {

@@ -1,7 +1,6 @@
 if (!Function.prototype.bind) {
   Function.prototype.bind = function(oThis) {
     var aArgs, fBound, fNOP, fToBind;
-
     if (typeof this !== "function") {
       throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
     }

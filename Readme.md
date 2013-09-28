@@ -4,14 +4,8 @@
 
 todo:
 
-- image previews
-- load images via ajax
-
-
-
-
-- zoom?
-
+- support lots of thumb below
+- add fastclick? https://github.com/ftlabs/fastclick
 
 
 

@@ -22,7 +22,6 @@ H = Hammer;
 
 $("body").imagesLoaded(function() {
   var Gallery, Thumbs, gallery, thumbs;
-
   add_devices_css();
   $('img').on('dragstart', function(evt) {
     return evt.preventDefault();
@@ -42,11 +41,9 @@ $("body").imagesLoaded(function() {
 
     Thumbs.prototype.init = function() {
       var img_width, width;
-
       img_width = 80;
       _(this.imagez()).each(function(img, idx) {
         var _this = this;
-
         return img.addEventListener("click", function() {
           return gallery.go_to(parseInt(img.dataset.id));
         });
@@ -125,7 +122,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.init = function() {
       var _this = this;
-
       return $.getJSON("/slides.json", function(slides) {
         _this.slides = slides;
         return _this.initialize();
@@ -145,7 +141,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.load_image = function(idx) {
       var gallery, img, url;
-
       url = "/issues/4/" + this.slides[idx] + ".jpg";
       img = new Image();
       img.src = url;
@@ -184,7 +179,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.zindex_sort_reverse = function() {
       var _this = this;
-
       return _(this.images).each(function(img, idx) {
         return img.style.zIndex = _this.images.length - idx;
       });
@@ -212,7 +206,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.next = function() {
       var _this = this;
-
       if (this.index >= this.slides.length - 1) {
         return;
       }
@@ -232,7 +225,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.prev = function() {
       var _this = this;
-
       if (this.index <= 0) {
         return;
       }
@@ -255,7 +247,6 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.prepare_for_animation = function(callback) {
       var img, _i, _len, _ref,
         _this = this;
-
       _ref = this.images;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         img = _ref[_i];
@@ -263,7 +254,6 @@ $("body").imagesLoaded(function() {
       }
       return setTimeout(function() {
         var _j, _len1, _ref1;
-
         _ref1 = _this.images;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           img = _ref1[_j];
@@ -285,7 +275,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.handle_drag = function(evt) {
       var x;
-
       x = evt.gesture ? evt.gesture ? evt.gesture.deltaX : void 0 : evt.changedTouches ? evt.changedTouches[0].pageX - this.start_x : evt.pageX;
       return this.current().translateX(x);
     };
@@ -296,7 +285,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.move_end = function(evt) {
       var id, moving_left_at_start, moving_right_at_end, not_enough_movement, page_x, x, x_delta, x_delta_min;
-
       this.cur_img().className = null;
       page_x = this.get_touch(evt).pageX;
       x = this.start_x - page_x;
@@ -321,7 +309,6 @@ $("body").imagesLoaded(function() {
     Gallery.prototype.unbind_gestures = function() {
       return _(this.images).each(function(img) {
         var h_img;
-
         h_img = H(img);
         h_img.off("drag", this.move);
         h_img.off("dragstart", this.move_start);
@@ -334,7 +321,6 @@ $("body").imagesLoaded(function() {
 
     Gallery.prototype.bind_gestures = function() {
       var h_image;
-
       this.unbind_gestures();
       this.cur_img().addEventListener("touchstart", this.move_start);
       this.cur_img().addEventListener("touchmove", this.move);
@@ -427,7 +413,6 @@ $.fn.translateX = function(left) {
 
 get_base_image = function(current) {
   var image;
-
   image = new Image();
   image.src = current.attr("src");
   return image;
@@ -439,7 +424,6 @@ debug = function(string) {
 
 log = function(string) {
   var existing;
-
   existing = $(".debug").html();
   if (existing) {
     existing = "" + existing + "<br>";

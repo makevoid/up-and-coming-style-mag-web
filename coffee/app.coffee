@@ -2,6 +2,7 @@ json = JSON.parse(ISSUES_JSON)
 
 PATH = json.path
 SIZE = json.size
+format = "png" #jpg
 
 # utils
 
@@ -49,7 +50,7 @@ class Gallery
     start = @start_zoom_touch
     x = end.pageX - start.pageX
     y = end.pageY - start.pageY
-    console.log "zoom end", x, y
+    # console.log "zoom end", x, y
 
 
   handle_swipe: ->
@@ -94,7 +95,6 @@ class Gallery
     @drag_start = { x: evt.pageX, y: evt.pageY }
 
   handle_zdrag_end: (evt) ->
-    return unless @drag_start
     dx = evt.pageX - @drag_start.x
     dy = evt.pageY - @drag_start.y
     px = dx / innerWidth  * 100
@@ -103,20 +103,39 @@ class Gallery
     @py = py + @py
     @px = Math.min 25, Math.max(-25, @px)
     @py = Math.min 25, Math.max(-25, @py)
+    # evt.target.style.webkitTransitionDuration = '0.4s'
     defer =>
       evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
+      @drag_start = null
+      
+  # TODO: refactor those guys
 
+  handle_zdrag_move: (evt) ->
+    if @drag_start
+      dx = evt.pageX - @drag_start.x
+      dy = evt.pageY - @drag_start.y
+      px = dx / innerWidth  * 100
+      py = dy / innerHeight * 100
+      @px = px*6
+      @py = py*6
+      # evt.target.style.webkitTransitionDuration = '0'
+      defer =>
+        evt.target.style.webkitTransform = "scale3d(#{this.scale_factor}) translate3d(#{@px}%, #{@py}%, 0)"
+    @drag_start = { x: evt.pageX, y: evt.pageY }
 
   handle_mouseup: (event) => # same as down
     this.handle_zdrag_end event
 
   unbind_movearound: ->
-    document.removeEventListener "mouseup", this.handle_mouseup
+    document.removeEventListener "mouseup", this.handle_zdrag_end
 
   bind_movearound: ->
     img = document.querySelector ".main img"
 
     img.addEventListener "mousedown", this.handle_zdrag_start.bind this
+
+    # img.addEventListener "mousemove", this.handle_zdrag_move.bind this
+    
 
     document.addEventListener "mouseup", this.handle_mouseup
 
@@ -128,6 +147,9 @@ class Gallery
 
     img.addEventListener "touchend", (event) =>
       this.handle_zdrag_end event.changedTouches[0]
+      
+    img.addEventListener "touchmove", (event) =>
+      this.handle_zdrag_move event.changedTouches[0]
 
 
   # move
@@ -188,7 +210,7 @@ class Window
     img = document.createElement "img"
     img.draggable = true
     img.dataset.id = idx
-    img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
+    img.src = "#{this.images_dir}/#{this.pad idx+1}.#{format}"
 
     this.gallery_elem().appendChild img
     img.style.opacity = 1
@@ -206,7 +228,8 @@ class Window
     img = document.createElement "img"
     img.draggable = true
     img.dataset.id = idx
-    img.src = "/#{this.images_dir}/#{this.pad idx+1}.jpg"
+    src = "#{this.images_dir}/#{this.pad idx+1}.#{format}"
+    img.src = src
     this.gallery_elem().appendChild img
     img.style.opacity = 1
 

@@ -26,7 +26,8 @@ class Upandcoming < Sinatra::Base
   # confs
 
   ISSUE_NUM = 1 # defines the directory whre the issue images are
-
+  FORMAT = "jpg" #jpg
+  
   #
 
   def issues_dir
@@ -35,7 +36,7 @@ class Upandcoming < Sinatra::Base
 
   helpers do
     def photos
-      all = Dir.glob("#{@@path}/public/#{@@issues_dir}/#{ISSUE_NUM}/*.jpg")
+      all = Dir.glob("#{@@path}/public/#{@@issues_dir}/#{ISSUE_NUM}/*.#{FORMAT}")
       all.sort_by do |img|
         File.basename(img).to_i
       end
