@@ -1,4 +1,4 @@
-var Gallery, PATH, SIZE, Window, defer, format, json, llog, removeElement,
+var Gallery, PATH, SIZE, Window, add_img, defer, format, json, llog, main_tag, removeElement, util,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 json = JSON.parse(ISSUES_JSON);
@@ -7,7 +7,11 @@ PATH = json.path;
 
 SIZE = json.size;
 
-format = "jpg";
+format = "svg";
+
+main_tag = "img";
+
+util = {};
 
 llog = function(log) {
   var debug;
@@ -21,6 +25,42 @@ defer = function(fn) {
 
 removeElement = function(elem) {
   return elem.parentNode.removeChild(elem);
+};
+
+util.pad = function(num) {
+  var s;
+  s = "00" + num;
+  return s.substr(s.length - 3);
+};
+
+add_img = function(num) {
+  var img, main, obj,
+    _this = this;
+  num = util.pad(num);
+  main = document.querySelector(".main");
+  img = "<img data-id='0' style='width: 210%;' draggable src='issues/1/" + num + ".svg'>";
+  obj = "<object data-id='0'  data='issues/1/" + num + ".svg' style='width: 100%; height: 100px'></object>";
+  obj = document.createElement("object");
+  obj.data = "issues/1/" + num + ".svg";
+  obj.style.width = "100%";
+  obj.style.height = "100%";
+  console.log(num);
+  llog("start");
+  main.appendChild(obj);
+  return obj.addEventListener("load", function() {
+    img = document.createElement("img");
+    img.dataset.id = 0;
+    img.src = "issues/1/" + num + ".svg";
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.opacity = 1;
+    return img.addEventListener("load", function() {
+      obj.remove();
+      console.log("svg");
+      main.appendChild(img);
+      return llog("load");
+    });
+  });
 };
 
 Gallery = (function() {
@@ -89,14 +129,14 @@ Gallery = (function() {
 
   Gallery.prototype.zoom = function() {
     var img;
-    img = document.querySelector(".main img");
+    img = document.querySelector(".main " + main_tag);
     img.style.webkitTransform = "scale3d(" + this.scale_factor + ")";
     return this.bind_movearound();
   };
 
   Gallery.prototype.dezoom = function() {
     var img;
-    img = document.querySelector(".main img");
+    img = document.querySelector(".main " + main_tag);
     img.style.webkitTransform = "scale3d(1, 1, 1)";
     this.unbind_movearound();
     this.px = 0;
@@ -159,7 +199,7 @@ Gallery = (function() {
   Gallery.prototype.bind_movearound = function() {
     var img,
       _this = this;
-    img = document.querySelector(".main img");
+    img = document.querySelector(".main " + main_tag);
     img.addEventListener("mousedown", this.handle_zdrag_start.bind(this));
     document.addEventListener("mouseup", this.handle_mouseup);
     img.addEventListener("dragstart", function(event) {
@@ -196,7 +236,7 @@ Gallery = (function() {
       return;
     }
     if (this.zoomed) {
-      img = document.querySelector(".main img");
+      img = document.querySelector(".main " + main_tag);
       this.remove_all_listeners(img);
     }
     this.zoomed = false;
@@ -235,17 +275,22 @@ Window = (function() {
   }
 
   Window.prototype.replace_window = function(idx) {
-    var images, img, _i, _len;
-    images = document.querySelectorAll(".main img");
+    var images, img, src, _i, _len;
+    images = document.querySelectorAll(".main " + main_tag);
     for (_i = 0, _len = images.length; _i < _len; _i++) {
       img = images[_i];
       removeElement(img);
     }
-    img = document.createElement("img");
+    img = document.createElement(main_tag);
     img.draggable = true;
     img.dataset.id = idx;
-    img.src = "" + this.images_dir + "/" + (this.pad(idx + 1)) + "." + format;
-    this.gallery_elem().appendChild(img);
+    src = "" + this.images_dir + "/" + (util.pad(idx + 1)) + "." + format;
+    if (main_tag === "img") {
+      img.src = src;
+    } else {
+      img.data = src;
+    }
+    add_img(idx + 1);
     img.style.opacity = 1;
     return img.style.webkitTransform = "translate3d(0, 0, 0)";
   };
@@ -257,12 +302,16 @@ Window = (function() {
   Window.prototype.push_image = function(idx) {
     var direction, img, src;
     direction = this.direction(idx);
-    img = document.createElement("img");
+    img = document.createElement(main_tag);
     img.draggable = true;
     img.dataset.id = idx;
-    src = "" + this.images_dir + "/" + (this.pad(idx + 1)) + "." + format;
-    img.src = src;
-    this.gallery_elem().appendChild(img);
+    src = "" + this.images_dir + "/" + (util.pad(idx + 1)) + "." + format;
+    if (main_tag === "img") {
+      img.src = src;
+    } else {
+      img.data = src;
+    }
+    add_img(idx + 1);
     img.style.opacity = 1;
     if (direction === "next") {
       img.style.webkitTransform = "translate3d(100%, 0, 0)";
@@ -275,7 +324,7 @@ Window = (function() {
   Window.prototype.deferred_slide = function(idx, percent) {
     return defer(function() {
       var img;
-      img = document.querySelector(".main img[data-id='" + idx + "']");
+      img = document.querySelector(".main " + main_tag + "[data-id='" + idx + "']");
       return img.style.webkitTransform = "translate3d(" + percent + "%, 0, 0)";
     });
   };
@@ -291,14 +340,14 @@ Window = (function() {
 
   Window.prototype.remove_func = function(idx) {
     var img;
-    img = document.querySelector(".main img[data-id='" + idx + "']");
+    img = document.querySelector(".main " + main_tag + "[data-id='" + idx + "']");
     return removeElement(img);
   };
 
   Window.prototype.remove_image = function(idx) {
     var img,
       _this = this;
-    img = document.querySelector(".main img");
+    img = document.querySelector(".main " + main_tag);
     return img.addEventListener("webkitTransitionEnd", function() {
       return _this.remove_func(idx);
     });
@@ -312,7 +361,7 @@ Window = (function() {
     var img,
       _this = this;
     if (this.webkit_is_supported()) {
-      img = document.querySelector(".main img");
+      img = document.querySelector(".main " + main_tag);
       return img.addEventListener("webkitTransitionEnd", function() {
         return func();
       });
@@ -333,12 +382,6 @@ Window = (function() {
     } else {
       return "prev";
     }
-  };
-
-  Window.prototype.pad = function(num) {
-    var s;
-    s = "00" + num;
-    return s.substr(s.length - 3);
   };
 
   return Window;
@@ -364,5 +407,6 @@ domready(function() {
   next = document.querySelector(".main .next");
   next.addEventListener("click", gallery.next.bind(gallery));
   zoom = document.querySelector(".main .zoom");
-  return zoom.addEventListener("click", gallery.handle_zoom.bind(gallery));
+  zoom.addEventListener("click", gallery.handle_zoom.bind(gallery));
+  return add_img(1);
 });

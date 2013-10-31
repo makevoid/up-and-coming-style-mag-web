@@ -1,10 +1,13 @@
-json = JSON.parse(ISSUES_JSON)
+json = JSON .parse(ISSUES_JSON)
 
 PATH = json.path
 SIZE = json.size
-format = "png" #jpg
+format = "svg" #jpg
+main_tag = "img" # "img"
 
-# utils
+# utils - TODO: move in utils.
+
+util = {}
 
 llog = (log) ->
   debug = document.querySelector ".debug"
@@ -16,6 +19,38 @@ defer = (fn) ->
 removeElement = (elem) ->
   # use .remove() when possible, will delete when Safari/MobileSafari will update the syntax?
   elem.parentNode.removeChild elem
+
+util.pad = (num) ->
+  s = "00" + num
+  s.substr s.length-3
+
+add_img = (num) ->
+  num = util.pad num
+  main = document.querySelector ".main"
+  img = "<img data-id='0' style='width: 210%;' draggable src='issues/1/#{num}.svg'>"
+  obj = "<object data-id='0'  data='issues/1/#{num}.svg' style='width: 100%; height: 100px'></object>"
+  obj = document.createElement "object"
+  # obj.dataset.id = 0
+  obj.data = "issues/1/#{num}.svg"
+  obj.style.width = "100%"
+  obj.style.height = "100%"  
+  console.log num
+  
+  llog "start"
+  main.appendChild obj
+  obj.addEventListener "load", =>
+    img = document.createElement "img"
+    img.dataset.id = 0
+    img.src = "issues/1/#{num}.svg"
+    img.style.width = "100%"
+    img.style.height = "100%"
+    img.style.opacity = 1
+    img.addEventListener "load", =>
+      obj.remove()
+      console.log "svg"
+      main.appendChild img
+      llog "load"
+
 
 
 class Gallery
@@ -79,12 +114,12 @@ class Gallery
     @zoomed = !@zoomed
 
   zoom: ->
-    img = document.querySelector ".main img"
+    img = document.querySelector ".main #{main_tag}"
     img.style.webkitTransform = "scale3d(#{this.scale_factor})"
     this.bind_movearound()
 
   dezoom: ->
-    img = document.querySelector ".main img"
+    img = document.querySelector ".main #{main_tag}"
     img.style.webkitTransform = "scale3d(1, 1, 1)"
     this.unbind_movearound()
     @px = 0
@@ -130,7 +165,7 @@ class Gallery
     document.removeEventListener "mouseup", this.handle_zdrag_end
 
   bind_movearound: ->
-    img = document.querySelector ".main img"
+    img = document.querySelector ".main #{main_tag}"
 
     img.addEventListener "mousedown", this.handle_zdrag_start.bind this
 
@@ -165,7 +200,7 @@ class Gallery
     return if idx < 0
     return if idx > @size
     if @zoomed
-      img = document.querySelector ".main img"
+      img = document.querySelector ".main #{main_tag}"
       this.remove_all_listeners img
     @zoomed = false
     @px = 0
@@ -203,16 +238,20 @@ class Window
   # replace
 
   replace_window: (idx) ->
-    images = document.querySelectorAll ".main img"
+    images = document.querySelectorAll ".main #{main_tag}"
     for img in images
       removeElement img
 
-    img = document.createElement "img"
+    img = document.createElement main_tag
     img.draggable = true
     img.dataset.id = idx
-    img.src = "#{this.images_dir}/#{this.pad idx+1}.#{format}"
-
-    this.gallery_elem().appendChild img
+    src = "#{this.images_dir}/#{util.pad idx+1}.#{format}"
+    if main_tag == "img"
+      img.src = src
+    else
+      img.data = src
+    # this.gallery_elem().appendChild img
+    add_img idx+1
     img.style.opacity = 1
 
     img.style.webkitTransform = "translate3d(0, 0, 0)"
@@ -225,12 +264,16 @@ class Window
   push_image: (idx) ->
     direction = this.direction idx
 
-    img = document.createElement "img"
+    img = document.createElement main_tag
     img.draggable = true
     img.dataset.id = idx
-    src = "#{this.images_dir}/#{this.pad idx+1}.#{format}"
-    img.src = src
-    this.gallery_elem().appendChild img
+    src = "#{this.images_dir}/#{util.pad idx+1}.#{format}"
+    if main_tag == "img"
+      img.src = src
+    else
+      img.data = src
+    # this.gallery_elem().appendChild img
+    add_img idx+1
     img.style.opacity = 1
 
     if direction == "next"
@@ -244,7 +287,7 @@ class Window
 
   deferred_slide: (idx, percent) ->
     defer ->
-      img = document.querySelector ".main img[data-id='#{idx}']"
+      img = document.querySelector ".main #{main_tag}[data-id='#{idx}']"
       img.style.webkitTransform = "translate3d(#{percent}%, 0, 0)"
 
   slide: (direction, idx) ->
@@ -257,7 +300,7 @@ class Window
     this.remove_image next_id, direction
 
   remove_func: (idx) ->
-    img = document.querySelector ".main img[data-id='#{idx}']"
+    img = document.querySelector ".main #{main_tag}[data-id='#{idx}']"
     removeElement img
 
   remove_image: (idx) ->
@@ -272,7 +315,7 @@ class Window
     # console.log "will remove #{idx}"
 
     # this.delayed_remove remove_func
-    img = document.querySelector ".main img"
+    img = document.querySelector ".main #{main_tag}"
     img.addEventListener "webkitTransitionEnd", => this.remove_func(idx)
 
   # private
@@ -282,7 +325,7 @@ class Window
 
   delayed_remove: (func) ->
     if this.webkit_is_supported()
-      img = document.querySelector ".main img"
+      img = document.querySelector ".main #{main_tag}"
       img.addEventListener "webkitTransitionEnd", =>
         func()
     else
@@ -296,9 +339,6 @@ class Window
   direction: (idx) ->
     if idx > @gallery.idx then "next" else "prev"
 
-  pad: (num) ->
-    s = "00" + num
-    s.substr s.length-3
 
 
 
@@ -327,6 +367,10 @@ domready ->
   next.addEventListener "click", gallery.next.bind gallery
   zoom = document.querySelector ".main .zoom"
   zoom.addEventListener "click", gallery.handle_zoom.bind gallery
+  
+  add_img 1
+
+
 
   #debug
   # gallery.zoom()

@@ -89,29 +89,28 @@ html, body
   img:hover
     opacity: 1
 
-.main img
-  width: 100%
-  display: block
-  position: absolute
-  opacity: 0
-  // optional, may reduce performance, reduce radius if necessary
-  box-shadow: 0 0 10px #999
-
-  // +transition(-webkit-transform 0.4s ease-in-out)
-  -webkit-transition: all 0.4s ease-in-out
-  // -webkit-transform: "translate3d(200%, 0, 0)"
+.main 
+  img, object
+    width: 100%
+    display: block
+    position: absolute
+    opacity: 0
+    // optional, may reduce performance, reduce radius if necessary
+    // box-shadow: 0 0 10px #999
+    // +transition(-webkit-transform 0.4s ease-in-out)
+    -webkit-transition: all 0.4s ease-in-out
+    // -webkit-transform: "translate3d(200%, 0, 0)"
+    &:first-child
+      opacity: 1
 
 // .main img .back
 // .main img .back
 
-.main img:first-child
-  opacity: 1
+.ffos .main 
+  img, object
+    box-shadow: none
 
-
-.ffos .main img
-  box-shadow: none
-
-img.fast
+img.fast, object.fast
   +transition(all 0)
 
 .main a

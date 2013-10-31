@@ -70,21 +70,19 @@ html, body {
 .thumbs img:hover {
   opacity: 1; }
 
-.main img {
+.main img, .main object {
   width: 100%;
   display: block;
   position: absolute;
   opacity: 0;
-  box-shadow: 0 0 10px #999999;
   -webkit-transition: all 0.4s ease-in-out; }
+  .main img:first-child, .main object:first-child {
+    opacity: 1; }
 
-.main img:first-child {
-  opacity: 1; }
-
-.ffos .main img {
+.ffos .main img, .ffos .main object {
   box-shadow: none; }
 
-img.fast {
+img.fast, object.fast {
   -webkit-transition: all 0;
   -moz-transition: all 0;
   transition: all 0; }
