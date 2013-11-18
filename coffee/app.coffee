@@ -10,6 +10,7 @@ main_tag = "img" # "img"
 util = {}
 
 llog = (log) ->
+  return false
   debug = document.querySelector ".debug"
   debug.innerHTML += "#{log}<br>"
 
@@ -47,7 +48,6 @@ add_img = (num) ->
     img.style.opacity = 1
     img.addEventListener "load", =>
       obj.remove()
-      console.log "svg"
       main.appendChild img
       llog "load"
 
@@ -238,6 +238,7 @@ class Window
   # replace
 
   replace_window: (idx) ->
+    llog "replace"
     images = document.querySelectorAll ".main #{main_tag}"
     for img in images
       removeElement img
@@ -255,13 +256,16 @@ class Window
     img.style.opacity = 1
 
     img.style.webkitTransform = "translate3d(0, 0, 0)"
+  
+  push_image: (idx) ->
+    this.replace_window idx
 
   # push_and_slide
 
   push_and_slide: (idx) ->
     this.push_image idx
 
-  push_image: (idx) ->
+  push_image_old: (idx) ->
     direction = this.direction idx
 
     img = document.createElement main_tag

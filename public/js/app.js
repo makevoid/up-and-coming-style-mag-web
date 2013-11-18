@@ -15,6 +15,7 @@ util = {};
 
 llog = function(log) {
   var debug;
+  return false;
   debug = document.querySelector(".debug");
   return debug.innerHTML += "" + log + "<br>";
 };
@@ -56,7 +57,6 @@ add_img = function(num) {
     img.style.opacity = 1;
     return img.addEventListener("load", function() {
       obj.remove();
-      console.log("svg");
       main.appendChild(img);
       return llog("load");
     });
@@ -276,6 +276,7 @@ Window = (function() {
 
   Window.prototype.replace_window = function(idx) {
     var images, img, src, _i, _len;
+    llog("replace");
     images = document.querySelectorAll(".main " + main_tag);
     for (_i = 0, _len = images.length; _i < _len; _i++) {
       img = images[_i];
@@ -295,11 +296,15 @@ Window = (function() {
     return img.style.webkitTransform = "translate3d(0, 0, 0)";
   };
 
+  Window.prototype.push_image = function(idx) {
+    return this.replace_window(idx);
+  };
+
   Window.prototype.push_and_slide = function(idx) {
     return this.push_image(idx);
   };
 
-  Window.prototype.push_image = function(idx) {
+  Window.prototype.push_image_old = function(idx) {
     var direction, img, src;
     direction = this.direction(idx);
     img = document.createElement(main_tag);

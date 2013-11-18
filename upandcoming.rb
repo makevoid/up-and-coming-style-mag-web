@@ -49,7 +49,8 @@ class Upandcoming < Sinatra::Base
   end
 
   get "/" do
-    haml :index
+    # haml :index
+    File.read "public/app.html"
   end
 
   # get "/slides.json" do
